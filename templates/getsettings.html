@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Get vManage Settings</title></head>
+	<body>
+	<br>
+	vManage API interface must be reachable from this app.<br>
+	To run on-premise, use the code available at: <a href="https://github.com/dbrown92700/vmanager">https://github.com/dbrown92700/vmanager</a><br>
+	<br>
+	 <a href = '/menu'>Continue</a> with the following settings:
+	<table>
+		<tr><td width="20"> </td><td>vManage:</td><td>{{vmanage}}</td></tr>
+		<tr><td width="20"> </td><td>UserID:</td><td>{{userid}}</td></tr>
+		<tr><td width="20"> </td><td>Password:</td><td>{{secret}}</td></tr>
+	</table>
+	</br>Or</br><br>Enter a new vManage settings below:<br>
+		<form action="/savesettings">
+			<table>
+				<tr><td width="20"></td><td>vManage:</td><td><input type="text" id="vmanage" name="vmanage" value="{{vmanage}}"></td></tr>
+				<tr><td width="20"></td><td>UserID:</td><td><input type="text" id="userid" name="userid" value="{{userid}}"></td></tr>
+				<tr><td width="20"></td> <td>Password:</td><td><input type="password" id="password" name="password" value="{{password}}"></td></tr>
+				<tr><td><input type="submit" value="Submit"></td></tr>
+			</table>
+		</form>
+	<br>
+	</body>
+</html>

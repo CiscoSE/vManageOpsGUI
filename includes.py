@@ -1,0 +1,134 @@
+import json
+from flask import request
+from vmanage_api import rest_api_lib
+from time import sleep
+
+def login():
+
+    ### Gets vManage variables from cookie and returns a vManage login object
+
+    vmanage_name = request.cookies.get('vmanage')
+    vmanage_user = request.cookies.get('userid')
+    vmanage_pass = request.cookies.get('password')
+    vmanage = rest_api_lib(vmanage_name, vmanage_user, vmanage_pass)
+
+    return vmanage
+
+def buildtable(data, link=False):
+
+    #
+    #  Builds an HTML table from data (list of lists)
+    #  Assumes row 0 are headers
+    #  If a link is passed, hyperlinks the first column by appending the string in
+    #  the first element of each row to the link string
+    #
+
+    output = '<TABLE BORDER=1>\n'
+    for header in data[0]:
+        output += f'<TH ALIGN=left>{header}</TH>'
+    start = 1 if link else 0
+    for row in data[1:]:
+        output += '\n<TR>'
+        if link:
+            output += f"<TD><A HREF='{link}{row[0]}'>{row[0]}</A>"
+        for element in row[start:]:
+            output += f"<TD>{element}</TD>"
+        if link:
+            output += f"</A>"
+        output += '</TR>'
+    output += '\n</TABLE>'
+    return output
+
+def buildform(data, action='/'):
+
+    #
+    #  Builds an HTML form from data (dict)
+    #
+    output = f'<FORM ACTION={action} METHOD="post">\n'
+    output +='<TABLE>'
+    for item in data:
+        output += f'<TR><TD><LABEL FOR="{item}">{item}</LABEL></TD>'
+        output += f'<TD><INPUT TYPE="text" ID="{item}" NAME="{item}" VALUE="{data[item]}"></TD></TR>\n'
+    output += '</TABLE><BR>\n<input type="submit" value="Submit">\n</FORM>'
+    return output
+
+def list_edges(vmanage, mode = 'all', model = 'all'):
+
+    # Returns a list of Edges as list of lists [uuid, deviceModel, configOperationMode]
+    # Set mode to all, cli, or vmanage
+
+    print(mode, model)
+    response = vmanage.get_request('system/device/vedges')
+    print(response)
+    print(json.dumps(response['data'],indent=2))
+    num = 1
+    deviceList = []
+    for device in response['data']:
+        if mode=='all' or device['configOperationMode']==mode:
+            if model == 'all' or device['deviceModel'] == model:
+                try:
+                    hostname = device['host-name']
+                except:
+                    hostname = 'UNASSIGNED'
+                print(f"{num:3}: {device['uuid']:50} {hostname:20} {device['deviceModel']:20}  {device['configOperationMode']:20}")
+                num += 1
+                deviceList.append([device['uuid'], hostname, device['deviceModel'],device['configOperationMode']])
+    return deviceList
+
+def get_device_template_variables(vmanage, deviceId):
+
+    response = vmanage.get_request(f'system/device/vedge?uuid={deviceId}')
+    print(f"Device Template ID: {response['data'][0]['templateId']}")
+    payload = {"templateId": f"{response['data'][0]['templateId']}", "deviceIds": [f"{deviceId}"], "isEdited": "false",
+          "isMasterEdited": "false"}
+    templateVariables = vmanage.post_request('template/device/config/input', payload)['data'][0]
+    template = {
+        "templateId": f"{response['data'][0]['templateId']}",
+        "device": [
+            templateVariables
+        ],
+        "isEdited": False,
+        "isMasterEdited": False
+    }
+    return template
+
+def set_certificate(vmanage, uuid, model, state):
+
+    # Set device certificate state to valid, invalid or staging
+
+    # Find existing certificate details for device UUID
+    # Create certificate request payload JSON
+    certrecords = vmanage.get_request(f'certificate/vedge/list?model={model}')['data']
+    for device in certrecords:
+        if device['uuid']==uuid:
+            break
+    payload = [
+        {
+        "serialNumber": f"{device['serialNumber']}",
+        "chasisNumber": f"{uuid}",
+        "validity": f"{state}"
+        }
+    ]
+
+    cert_status = vmanage.post_request('certificate/save/vedge/list', payload)
+    output = "<b>Set certificate state result:</b><br>" + json.dumps(cert_status, indent=2)
+
+    cert_status = vmanage.post_request('certificate/vedge/list', payload='')
+    output += "<br><b>Push certificate state to controllers result:</b><br>" + str(json.dumps(cert_status, indent=2))
+    output += action_status(vmanage, cert_status['id'])
+
+    return output
+
+def action_status(vmanage, id):
+
+    output = '<br><b>Monitor Job Status:</b></br>'
+    while (1):
+        status = vmanage.get_request(f"device/action/status/{id}")
+        status_res = status['summary']
+        output += '<br>' + str(status_res)
+        if status_res['status'] == "done":
+            if ('Success' in status_res['count']) or ('Done - Scheduled' in status_res['count']):
+                return output
+            elif 'Failure' in status_res['count']:
+                return "<br>" + str(status['data'][0]['activity']) + "<br>Failed"
+        sleep(5)
