@@ -1,4 +1,4 @@
-# vManagerGUI
+# Cisco SDWAN Ops GUI
 Web GUI for basic SDWAN operations tasks.  Currently supports:
 - Deploy a New Edge
 - Change Edge Template Values
