@@ -9,11 +9,11 @@ Web GUI for basic SDWAN operations tasks.  Currently supports:
 Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for production.
 
 # Screenshots
-Menu Screenshot:
+### Menu Screenshot:
 
-![ScreenShotMenu](https://user-images.githubusercontent.com/46031546/136489458-3c5da362-9e20-48b9-9be7-5ad42ba16519.png)
+![ScreenShotMenu](https://user-images.githubusercontent.com/46031546/136583237-13c45f5c-7266-48e6-bea4-d2fd7b7e096e.png)
 
-Edit or Deploy a Device Screenshot:
+### Edit or Deploy a Device Screenshot:
 
 ![ScreenShotEdit](https://user-images.githubusercontent.com/46031546/136489454-385b339a-b5b6-46ac-be81-7153ce7eb8e7.png)
 
@@ -45,3 +45,4 @@ This project was written and is maintained by the following individuals:
 ## Author
 
 * David Brown <davibrow@cisco.com>
+
