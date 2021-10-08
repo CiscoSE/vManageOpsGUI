@@ -37,6 +37,7 @@ Edit or Deploy a Device Screenshot:
 - Browse to the local webserver
 
     `http://localhost:8080`
+
 This project was written and is maintained by the following individuals:
 
 ## Author
