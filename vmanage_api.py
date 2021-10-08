@@ -32,24 +32,16 @@ class rest_api_lib:
 
 		login_action = '/j_security_check'
 
-		#Format data for loginForm
+		###Format data for loginForm
 		login_data = {'j_username' : username, 'j_password' : password}
 
-		#Url for posting login data
+		###Url for posting login data
 		login_url = base_url_str + login_action
-
 		url = base_url_str + login_url
-
 		sess = requests.session()
 
-		#If the vmanage has a certificate signed by a trusted authority change verify to True
+		###If the vmanage has a certificate signed by a trusted authority change verify to True
 		login_response = sess.post(url=login_url, data=login_data, verify=False)
-		
-		#print(login_response.content)
-
-		#if '<html>' in login_response.content:
-		#	print("Login Failed")
-		#	sys.exit(0)
 
 		self.session[vmanage_ip] = sess
 
@@ -86,21 +78,6 @@ class rest_api_lib:
 		headers = {'Content-Type': 'application/json'}
 		response = self.session[self.vmanage_ip].get(url, headers=headers, verify=False)
 		return response
-'''
-Sample Calls:
-
-List Devices
-	devices = obj.get_request('device')
-List Device Templates
-	templates = obj.get_request('template/device')
-List Devices Attached to Template
-	attached = obj.get_request(f'template/device/config/attached/{templateId}')
-Create Device Input Variables
-	payload = {"templateId":f"{templateId}","deviceIds":[f"{deviceId}"],"isEdited":"false","isMasterEdited":"false"}
-	variables = obj.post_request('template/device/config/input', payload)
-
-'''
-
 		
 def main(args):
 	if not len(args) == 3:

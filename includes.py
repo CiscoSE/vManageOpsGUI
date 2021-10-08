@@ -6,7 +6,6 @@ from time import sleep
 def login():
 
     ### Gets vManage variables from cookie and returns a vManage login object
-
     vmanage_name = request.cookies.get('vmanage')
     vmanage_user = request.cookies.get('userid')
     vmanage_pass = request.cookies.get('password')
@@ -16,13 +15,10 @@ def login():
 
 def buildtable(data, link=False):
 
-    #
-    #  Builds an HTML table from data (list of lists)
-    #  Assumes row 0 are headers
-    #  If a link is passed, hyperlinks the first column by appending the string in
-    #  the first element of each row to the link string
-    #
-
+    ###  Builds an HTML table from data (list of lists)
+    ###  Assumes row 0 are headers
+    ###  If a link is passed, hyperlinks the first column by appending the string in
+    ###  the first element of each row to the link string
     output = '<TABLE BORDER=1>\n'
     for header in data[0]:
         output += f'<TH ALIGN=left>{header}</TH>'
@@ -41,9 +37,7 @@ def buildtable(data, link=False):
 
 def buildform(data, action='/'):
 
-    #
-    #  Builds an HTML form from data (dict)
-    #
+    ###  Builds an HTML form from data (dict)
     output = f'<FORM ACTION={action} METHOD="post">\n'
     output +='<TABLE>'
     for item in data:
@@ -54,9 +48,8 @@ def buildform(data, action='/'):
 
 def list_edges(vmanage, mode = 'all', model = 'all'):
 
-    # Returns a list of Edges as list of lists [uuid, deviceModel, configOperationMode]
-    # Set mode to all, cli, or vmanage
-
+    ### Returns a list of Edges as list of lists [uuid, deviceModel, configOperationMode]
+    ### Set mode to all, cli, or vmanage
     response = vmanage.get_request('system/device/vedges')
     num = 1
     deviceList = []
@@ -73,8 +66,7 @@ def list_edges(vmanage, mode = 'all', model = 'all'):
 
 def list_templates(vmanage, model = 'all'):
 
-    # Returns a list of templates as list of lists [uuid, Name, Description, device type]
-
+    ### Returns a list of templates as list of lists [uuid, Name, Description, device type]
     response = vmanage.get_request('template/device')['data']
     templatelist = []
     for template in response:
@@ -84,11 +76,8 @@ def list_templates(vmanage, model = 'all'):
 
 def get_device_template_variables(vmanage, deviceId, templateId=None):
 
-    #
-    # Builds the JSON object that defines the template for a device
-    # Uses the templateId specified or finds and uses the attached templateId
-    #
-
+    ### Builds the JSON object that defines the template for a device
+    ### Uses the templateId specified or finds and uses the attached templateId
     if not templateId:
         response = vmanage.get_request(f'system/device/vedge?uuid={deviceId}')
         templateId = response['data'][0]['templateId']
@@ -107,10 +96,9 @@ def get_device_template_variables(vmanage, deviceId, templateId=None):
 
 def set_certificate(vmanage, uuid, model, state):
 
-    # Set device certificate state to valid, invalid or staging
-
-    # Find existing certificate details for device UUID
-    # Create certificate request payload JSON
+    ### Set device certificate state to valid, invalid or staging
+    ### Find existing certificate details for device UUID
+    ### Create certificate request payload JSON
     certrecords = vmanage.get_request(f'certificate/vedge/list?model={model}')['data']
     for device in certrecords:
         if device['uuid']==uuid:
@@ -134,6 +122,7 @@ def set_certificate(vmanage, uuid, model, state):
 
 def action_status(vmanage, id):
 
+    ### Monitors a job status every 5 seconds and returns the result
     output = '<br><b>Monitor Job Status:</b></br>'
     while (1):
         status = vmanage.get_request(f"device/action/status/{id}")

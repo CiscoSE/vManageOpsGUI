@@ -12,7 +12,6 @@ app.secret_key = 'any random string'
 ###########################################################################
 #  Prompt user to set vManage settings
 ###########################################################################
-
 @app.route('/')
 def getsettings():
     vmanage = request.cookies.get('vmanage')
@@ -30,14 +29,14 @@ def savesettings():
 
     resp = make_response(redirect(url_for('menu')))
 
-    # Save vManage settings in a cookie:
+    ### Save vManage settings in a cookie:
     for arg in request.args:
         resp.set_cookie(arg, request.args.get(arg), secure=True, httponly=True)
 
     return resp
 
 ###########################################################################
-#  Read and save settings
+#  Main menu.  This screen also clears any leftover session variables
 ###########################################################################
 
 @app.route('/menu')
@@ -46,6 +45,10 @@ def menu():
     ### Clear user session variables from previous tasks
     session.clear()
     return render_template('menu.html', vmanage=request.cookies.get('vmanage'))
+
+###########################################################################
+#  List edges.  Takes parameters model and mode.
+###########################################################################
 
 @app.route('/listedges')
 def listedges():
@@ -62,6 +65,9 @@ def listedges():
     return render_template('table.html', title='List Edges', instructions='List of all edge devices',
                            data=Markup(output))
 
+###########################################################################
+#  List templates.  Takes parameter model.
+###########################################################################
 @app.route('/listtemplates')
 def listtemplates():
 
@@ -75,14 +81,14 @@ def listtemplates():
     return render_template('table.html', title='List Templates', instructions='List of all templates',
                            data=Markup(output))
 
+###########################################################################
+#  RMA Edge. Collects device to replace, new device, and template details
+###########################################################################
 @app.route('/rmaedge')
 def rmaedge():
 
-    #
-    # List edges in vManage mode for user to select from
-    # If oldedge is already set move to the next step.
-    #
-
+    ### List edges in vManage mode for user to select from
+    ### If oldedge is already set move to the next step.
     try:
         oldedge = request.args.get('oldedge') or session['oldedge']
         session['oldedge'] = oldedge
@@ -95,11 +101,8 @@ def rmaedge():
         return render_template('table.html', data=Markup(output), title='Pick Old Edge',
                                instructions=Markup('Select the Edge device to replace:<br><br>'))
 
-    #
-    # List edges in CLI mode for user to choose from.
-    # If replacement edge is already set, move to the next step.
-    #
-
+    ### List edges in CLI mode for user to choose from.
+    ### If replacement edge is already set, move to the next step.
     try:
         newedge = request.args.get('newedge') or session['newedge']
         session['newedge'] = newedge
@@ -125,6 +128,9 @@ def rmaedge():
     jtemplate = Markup(json2html.convert(template))
     return render_template('rmaconfirm.html',template=jtemplate, oldedge=oldedge, newedge=newedge)
 
+###########################################################################
+#  RMA Edge confirmation screen prompts for confirmation and executes exchange
+###########################################################################
 @app.route('/rmaconfirm')
 def rmaconfirm():
 
@@ -163,14 +169,15 @@ def rmaconfirm():
     output += '<br><br><a href="/">Return to main menu</a>'
     return Markup(output)
 
+
+###########################################################################
+#  Edit edge.  Collects edge device, displays form with template values
+###########################################################################
 @app.route('/editedge')
 def editedge():
 
-    #
-    # Build a table of edges for user to select from.
-    # If edge has already been set, move to next step.
-    #
-
+    ### Build a table of edges for user to select from.
+    ### If edge has already been set, move to next step.
     try:
         edge = request.args.get('edge') or session['edge']
         session['edge'] = edge
@@ -183,11 +190,10 @@ def editedge():
         return render_template('table.html', data=Markup(output), title='Edit Edge Values',
                                instructions=Markup('Select the Edge device to edit:<br><br>'))
 
-    #
-    # Build a form of variables for user to edit.
-    # Post form to update template
-    #
 
+    ### Build a form of template variables for user to edit.
+    ### Uses templateId parameter or finds attached templateId
+    ### Post form to update template
     vmanage = login()
     try:
         templateId = request.args.get('templateId') or session['templateId']
@@ -209,19 +215,18 @@ def editedge():
     return render_template('table.html', data=Markup(output), title='Edit Edge Values',
                            instructions=Markup('Edit any values below and submit to update the device configuration:<br><br>'))
 
+###########################################################################
+#  Attach template and monitor job result
+###########################################################################
 @app.route('/updatetemp', methods=['POST'])
 def updatetemp():
 
-    #
-    # Retrieve variables and modify template
-    #
-
+    ### Retrieve variables and modify template
     template = session['template']
     output = '<A HREF="/menu">Return to Main Menu.</A><BR>'
     output += 'Old Template:<BR>' + json2html.convert(template)
 
     ### Create template variables JSON object with new UUID
-
     variables = request.form
     for value in variables:
         template['device'][0][value] = variables[value]
@@ -243,13 +248,15 @@ def updatetemp():
 
     return Markup(output)
 
+
+###########################################################################
+#  Deploy new edge. Prompt for edge, prompt for template, hand off to edit edge
+###########################################################################
 @app.route('/deployedge')
 def deployedge():
 
-    #
-    # List edges in CLI mode for user to choose from.
-    # If replacement edge is already set, move to the next step.
-    #
+    ### List edges in CLI mode for user to choose from.
+    ### If replacement edge is already set, move to the next step.
     try:
         edge = request.args.get('edge') or session['edge']
         session['edge'] = edge
@@ -267,11 +274,8 @@ def deployedge():
         return render_template('table.html', data=Markup(output), title='Pick New Edge',
                                instructions=Markup('Select the replacement Edge:<br><br>'))
 
-    #
-    # Build a list of templates that apply to the edge deviceType for the user to choose from
-    # Send the templateId and deviceId to the Edit Edge routine
-    #
-
+    ### Build a list of templates that apply to the edge deviceType for the user to choose from
+    ### Send the templateId and deviceId to the Edit Edge routine
     vmanage = login()
     data = list_templates(vmanage, model=session['model'])
     vmanage.logout()
