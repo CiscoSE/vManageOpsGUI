@@ -1,6 +1,5 @@
 #!/usr/bin/python38
 
-
 from flask import Flask, request, make_response, render_template, redirect, url_for, session
 from markupsafe import Markup
 from includes import *
@@ -48,7 +47,6 @@ def menu():
     session.clear()
     return render_template('menu.html', vmanage=request.cookies.get('vmanage'))
 
-
 @app.route('/listedges')
 def listedges():
 
@@ -64,8 +62,26 @@ def listedges():
     return render_template('table.html', title='List Edges', instructions='List of all edge devices',
                            data=Markup(output))
 
+@app.route('/listtemplates')
+def listtemplates():
+
+    model = request.args.get('model') or 'all'
+    vmanage = login()
+    data = list_templates(vmanage, model)
+    vmanage.logout()
+    data.insert(0, ['UUID','Name', 'Description','Device Type'])
+    output = buildtable(data)
+
+    return render_template('table.html', title='List Templates', instructions='List of all templates',
+                           data=Markup(output))
+
 @app.route('/rmaedge')
 def rmaedge():
+
+    #
+    # List edges in vManage mode for user to select from
+    # If oldedge is already set move to the next step.
+    #
 
     try:
         oldedge = request.args.get('oldedge') or session['oldedge']
@@ -78,6 +94,12 @@ def rmaedge():
         vmanage.logout()
         return render_template('table.html', data=Markup(output), title='Pick Old Edge',
                                instructions=Markup('Select the Edge device to replace:<br><br>'))
+
+    #
+    # List edges in CLI mode for user to choose from.
+    # If replacement edge is already set, move to the next step.
+    #
+
     try:
         newedge = request.args.get('newedge') or session['newedge']
         session['newedge'] = newedge
@@ -91,6 +113,11 @@ def rmaedge():
         vmanage.logout()
         return render_template('table.html', data=Markup(output), title='Pick New Edge',
                                instructions=Markup('Select the replacement Edge:<br><br>'))
+
+    #
+    # Gather data and pass to the RMA confirmation page
+    #
+
     vmanage = login()
     template = get_device_template_variables(vmanage, oldedge)
     session['template'] = template
@@ -136,13 +163,6 @@ def rmaconfirm():
     output += '<br><br><a href="/">Return to main menu</a>'
     return Markup(output)
 
-@app.route('/deployedge')
-def deployedge():
-
-    ### Clear user session variables from previous tasks
-    session.clear()
-    return render_template('menu.html', vmanage=request.cookies.get('vmanage'))
-
 @app.route('/editedge')
 def editedge():
 
@@ -168,25 +188,26 @@ def editedge():
     # Post form to update template
     #
 
+    vmanage = login()
     try:
-        variable = request.args.get('variable') or session['variable']
-        session['variable'] = variable
+        templateId = request.args.get('templateId') or session['templateId']
+        template = get_device_template_variables(vmanage, edge, templateId)
     except:
-        vmanage = login()
         template = get_device_template_variables(vmanage, edge)
-        session['template'] = template
-        data = template['device'][0]
-        tabdata = [['Field', 'Value']]
-        formdata = {}
-        for item in data:
-            if item[0] == '/':
-                formdata[item] = data[item]
-            else:
-                tabdata.append([item, data[item]])
-        output = buildtable(tabdata)
-        output += buildform(formdata, action='/updatetemp')
-        return render_template('table.html', data=Markup(output), title='Edit Edge Values',
-                               instructions=Markup('Edit any values below and submit to update the device configuration:<br><br>'))
+    vmanage.logout()
+    session['template'] = template
+    data = template['device'][0]
+    tabdata = [['Field', 'Value']]
+    formdata = {}
+    for item in data:
+        if item[0] == '/':
+            formdata[item] = data[item]
+        else:
+            tabdata.append([item, data[item]])
+    output = buildtable(tabdata)
+    output += buildform(formdata, action='/updatetemp')
+    return render_template('table.html', data=Markup(output), title='Edit Edge Values',
+                           instructions=Markup('Edit any values below and submit to update the device configuration:<br><br>'))
 
 @app.route('/updatetemp', methods=['POST'])
 def updatetemp():
@@ -221,6 +242,42 @@ def updatetemp():
     output += '<br><br><a href="/menu">Return to main menu</a>'
 
     return Markup(output)
+
+@app.route('/deployedge')
+def deployedge():
+
+    #
+    # List edges in CLI mode for user to choose from.
+    # If replacement edge is already set, move to the next step.
+    #
+    try:
+        edge = request.args.get('edge') or session['edge']
+        session['edge'] = edge
+        model = request.args.get('model') or session['model']
+        session['model'] = model
+    except:
+        vmanage = login()
+        data = list_edges(vmanage, mode='cli')
+        data.insert(0, ['UUID', 'Hostname', 'Model', 'Mode'])
+        for edge in data:
+            edgelink = f'<a href="/deployedge?edge={edge[0]}&model={edge[2]}">{edge[0]}</a>'
+            edge[0] = edgelink
+        output = buildtable(data)
+        vmanage.logout()
+        return render_template('table.html', data=Markup(output), title='Pick New Edge',
+                               instructions=Markup('Select the replacement Edge:<br><br>'))
+
+    #
+    # Build a list of templates that apply to the edge deviceType for the user to choose from
+    # Send the templateId and deviceId to the Edit Edge routine
+    #
+
+    vmanage = login()
+    data = list_templates(vmanage, model=session['model'])
+    vmanage.logout()
+    data.insert(0, ['uuid', 'Name', 'Description', 'device type'])
+    output = buildtable(data, link='/editedge?templateId=')
+    return render_template('table.html', data=Markup(output), title='Pick a template', instructions=Markup('Select the template to apply:<br><br>'))
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

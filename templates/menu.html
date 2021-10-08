@@ -5,14 +5,30 @@
     <title>vManager Menu</title>
 </head>
 <body>
-Logged into vManage: {{vmanage}}<br>
-<a href="/">Change vManage</a>
+<h1 style="margin-top: 30px;
+  margin-left: 80px;">
+    Logged into: {{vmanage}}</h1>
+<p style="margin-left: 80px;"><a href="/">Change vManage</a></p>
 <br>
-<ul>
-    <li><a href="/listedges">List Edges</a></li>
-    <li><a href="/deployedge">Deploy a new Edge</a></li>
-    <li><a href="/editedge">Change an Edge setting</a></li>
-    <li><a href="/rmaedge">RMA an Edge</a></li>
+<ul style="margin-top: 30px;
+  margin-left: 80px;">
+    <li style="margin-bottom: 10px;"><b>List Edges</b>
+        <form action="/listedges">
+        Device Type - <input type="text" name="model" value="all">
+        Configuration Mode - <select name="mode">
+                <option label="all">all</option>
+                <option label="vmanage">vmanage</option>
+                <option label="cli">cli</option>
+        </select>
+            <input type="submit" value="Submit">
+        </form></li>
+    <li style="margin-bottom: 10px;"><b>List Templates</b>
+        <form action="/listtemplates">
+        Device Type - <input type="text" name="model" value="all"><input type="submit" value="Submit">
+        </form></li>
+    <li style="margin-bottom: 10px;"><a href="/deployedge"><b>Deploy a new Edge</b></a></li>
+    <li style="margin-bottom: 10px;"><a href="/editedge"><b>Change an Edge setting</b></a></li>
+    <li style="margin-bottom: 10px;"><a href="/rmaedge"><b>RMA an Edge</b></a></li>
 </ul>
 </body>
 </html>

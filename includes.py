@@ -57,10 +57,7 @@ def list_edges(vmanage, mode = 'all', model = 'all'):
     # Returns a list of Edges as list of lists [uuid, deviceModel, configOperationMode]
     # Set mode to all, cli, or vmanage
 
-    print(mode, model)
     response = vmanage.get_request('system/device/vedges')
-    print(response)
-    print(json.dumps(response['data'],indent=2))
     num = 1
     deviceList = []
     for device in response['data']:
@@ -70,20 +67,36 @@ def list_edges(vmanage, mode = 'all', model = 'all'):
                     hostname = device['host-name']
                 except:
                     hostname = 'UNASSIGNED'
-                print(f"{num:3}: {device['uuid']:50} {hostname:20} {device['deviceModel']:20}  {device['configOperationMode']:20}")
                 num += 1
                 deviceList.append([device['uuid'], hostname, device['deviceModel'],device['configOperationMode']])
     return deviceList
 
-def get_device_template_variables(vmanage, deviceId):
+def list_templates(vmanage, model = 'all'):
 
-    response = vmanage.get_request(f'system/device/vedge?uuid={deviceId}')
-    print(f"Device Template ID: {response['data'][0]['templateId']}")
-    payload = {"templateId": f"{response['data'][0]['templateId']}", "deviceIds": [f"{deviceId}"], "isEdited": "false",
+    # Returns a list of templates as list of lists [uuid, Name, Description, device type]
+
+    response = vmanage.get_request('template/device')['data']
+    templatelist = []
+    for template in response:
+        if (template['deviceType'] == model) or (model == 'all'):
+            templatelist.append([template['templateId'],template['templateName'],template['templateDescription'], template['deviceType']])
+    return templatelist
+
+def get_device_template_variables(vmanage, deviceId, templateId=None):
+
+    #
+    # Builds the JSON object that defines the template for a device
+    # Uses the templateId specified or finds and uses the attached templateId
+    #
+
+    if not templateId:
+        response = vmanage.get_request(f'system/device/vedge?uuid={deviceId}')
+        templateId = response['data'][0]['templateId']
+    payload = {"templateId": f"{templateId}", "deviceIds": [f"{deviceId}"], "isEdited": "false",
           "isMasterEdited": "false"}
     templateVariables = vmanage.post_request('template/device/config/input', payload)['data'][0]
     template = {
-        "templateId": f"{response['data'][0]['templateId']}",
+        "templateId": f"{templateId}",
         "device": [
             templateVariables
         ],
