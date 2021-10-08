@@ -14,7 +14,9 @@
   margin-left: 80px;">
     <li style="margin-bottom: 10px;"><b>List Edges</b>
         <form action="/listedges">
-        Device Type - <input type="text" name="model" value="all">
+        <i>Filter: </i>Device Type - <select name="model">
+            {{models}}
+        </select>
         Configuration Mode - <select name="mode">
                 <option label="all">all</option>
                 <option label="vmanage">vmanage</option>
@@ -24,11 +26,32 @@
         </form></li>
     <li style="margin-bottom: 10px;"><b>List Templates</b>
         <form action="/listtemplates">
-        Device Type - <input type="text" name="model" value="all"><input type="submit" value="Submit">
+        <i>Filter: </i>Device Type - <select name="model">
+            {{models}}
+        </select>
+            <input type="submit" value="Submit">
         </form></li>
-    <li style="margin-bottom: 10px;"><a href="/deployedge"><b>Deploy a new Edge</b></a></li>
-    <li style="margin-bottom: 10px;"><a href="/editedge"><b>Change an Edge setting</b></a></li>
-    <li style="margin-bottom: 10px;"><a href="/rmaedge"><b>RMA an Edge</b></a></li>
+    <li style="margin-bottom: 10px;"><b>Deploy a new Edge</b>
+        <form action="/deployedge">
+        <i>Filter: </i>Device Type - <select name="model">
+            {{models}}
+        </select>
+            <input type="submit" value="Submit">
+        </form></li>
+    <li style="margin-bottom: 10px;"><b>Change an Edge setting</b>
+        <form action="/editedge">
+        <i>Filter: </i>Device Type - <select name="model">
+            {{models}}
+        </select>
+            <input type="submit" value="Submit">
+        </form></li>
+    <li style="margin-bottom: 10px;"><b>RMA an Edge</b>
+        <form action="/rmaedge">
+        <i>Filter: </i>Device Type - <select name="model">
+            {{models}}
+        </select>
+            <input type="submit" value="Submit">
+        </form></li>
 </ul>
 </body>
 </html>

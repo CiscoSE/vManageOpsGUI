@@ -61,7 +61,17 @@ def menu():
 
     ### Clear user session variables from previous tasks
     session.clear()
-    return render_template('menu.html', vmanage=request.cookies.get('vmanage'))
+    vmanage = login()
+    devices = vmanage.get_request('system/device/vedges')
+    vmanage.logout()
+    #print(json.dumps(devices,indent=2))
+    models='<option label="all">all</option>\n'
+    for device in devices['data']:
+        print(device['deviceModel'])
+        if device['deviceModel'] not in models:
+            models += f'<option label="{device["deviceModel"]}">{device["deviceModel"]}</option>\n'
+    print(models)
+    return render_template('menu.html', vmanage=request.cookies.get('vmanage'), models=Markup(models))
 
 ###########################################################################
 #  List edges.  Takes parameters model and mode.
@@ -104,6 +114,8 @@ def listtemplates():
 @app.route('/rmaedge')
 def rmaedge():
 
+    model = request.args.get('model') or session['model']
+    session['model'] = model
     ### List edges in vManage mode for user to select from
     ### If oldedge is already set move to the next step.
     try:
@@ -111,7 +123,7 @@ def rmaedge():
         session['oldedge'] = oldedge
     except:
         vmanage = login()
-        data = list_edges(vmanage, mode='vmanage')
+        data = list_edges(vmanage, mode='vmanage', model=model)
         data.insert(0, ['UUID', 'Hostname', 'Model', 'Mode'])
         output = buildtable(data, link='/rmaedge?oldedge=')
         vmanage.logout()
@@ -193,6 +205,8 @@ def rmaconfirm():
 @app.route('/editedge')
 def editedge():
 
+    model = request.args.get('model') or session['model']
+    session['model'] = model
     ### Build a table of edges for user to select from.
     ### If edge has already been set, move to next step.
     try:
@@ -200,7 +214,7 @@ def editedge():
         session['edge'] = edge
     except:
         vmanage = login()
-        data = list_edges(vmanage, mode='vmanage')
+        data = list_edges(vmanage, mode='vmanage', model=model)
         data.insert(0, ['UUID', 'Hostname', 'Model', 'Mode'])
         output = buildtable(data, link='/editedge?edge=')
         vmanage.logout()
@@ -274,14 +288,14 @@ def deployedge():
 
     ### List edges in CLI mode for user to choose from.
     ### If replacement edge is already set, move to the next step.
+    model = request.args.get('model') or session['model']
+    session['model'] = model
     try:
         edge = request.args.get('edge') or session['edge']
         session['edge'] = edge
-        model = request.args.get('model') or session['model']
-        session['model'] = model
     except:
         vmanage = login()
-        data = list_edges(vmanage, mode='cli')
+        data = list_edges(vmanage, mode='cli', model=model)
         data.insert(0, ['UUID', 'Hostname', 'Model', 'Mode'])
         for edge in data:
             edgelink = f'<a href="/deployedge?edge={edge[0]}&model={edge[2]}">{edge[0]}</a>'
