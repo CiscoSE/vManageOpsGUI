@@ -61,7 +61,14 @@ def menu():
 
     ### Clear user session variables from previous tasks
     session.clear()
-    vmanage = login()
+    try:
+        vmanage = login()
+    except:
+        return Markup(f'''Error attempting to log in.  Make sure:<br>
+                      <ul><li>vManage is reachable from this server.
+                    <li>Your vManage IP or Name is correct (do not include "https://", etc.)
+                    <li>Your credentials have API privileges</ul>
+                    <a href="/">Edit vManage settings</a>''')
     devices = vmanage.get_request('system/device/vedges')
     vmanage.logout()
     #print(json.dumps(devices,indent=2))
