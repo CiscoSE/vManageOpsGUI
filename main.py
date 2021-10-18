@@ -22,6 +22,7 @@ from markupsafe import Markup
 from includes import *
 from json2html import *
 import json
+from urllib import parse
 
 app = Flask(__name__)
 app.secret_key = 'any random string'
@@ -74,10 +75,8 @@ def menu():
     vmanage.logout()
     models = '<option label="all">all</option>\n'
     for device in devices['data']:
-        print(device['deviceModel'])
         if device['deviceModel'] not in models:
             models += f'<option label="{device["deviceModel"]}">{device["deviceModel"]}</option>\n'
-    print(models)
     return render_template('menu.html', vmanage=request.cookies.get('vmanage'), models=Markup(models))
 
 
@@ -128,6 +127,7 @@ def rmaedge():
     # If oldedge is already set move to the next step.
     try:
         oldedge = request.args.get('oldedge') or session['oldedge']
+        #oldedge = parse.quote_plus(oldedge)
         session['oldedge'] = oldedge
     except KeyError:
         vmanage = login()
@@ -145,6 +145,7 @@ def rmaedge():
         session['newedge'] = newedge
     except KeyError:
         vmanage = login()
+        oldedge = parse.quote_plus(oldedge)
         model = vmanage.get_request(f'device/models/{oldedge}')['name']
         session['model'] = model
         data = list_edges(vmanage, mode='cli', model=model)
@@ -159,6 +160,7 @@ def rmaedge():
     #
 
     vmanage = login()
+    print(oldedge)
     template = get_device_template_variables(vmanage, oldedge)
     session['template'] = template
     vmanage.logout()

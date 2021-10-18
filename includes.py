@@ -98,8 +98,14 @@ def get_device_template_variables(vmanage, deviceId, templateId=None):
     ### Builds the JSON object that defines the template for a device
     ### Uses the templateId specified or finds and uses the attached templateId
     if not templateId:
-        response = vmanage.get_request(f'system/device/vedge?uuid={deviceId}')
-        templateId = response['data'][0]['templateId']
+        # API defect CSCvy29407 in 20.6.1 breaks system/device/uuid={deviceID}
+        # response = vmanage.get_request(f'system/device/vedges?uuid={deviceId}')
+        # templateId = response['data'][0]['templateId']
+        response = vmanage.get_request(f'system/device/vedges')['data']
+        for device in response:
+            if device['uuid'] == deviceId:
+                templateId = device['templateId']
+                break
     payload = {"templateId": f"{templateId}", "deviceIds": [f"{deviceId}"], "isEdited": "false",
           "isMasterEdited": "false"}
     templateVariables = vmanage.post_request('template/device/config/input', payload)['data'][0]
