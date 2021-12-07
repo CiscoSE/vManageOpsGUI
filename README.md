@@ -39,10 +39,9 @@ Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for 
     `http://localhost:8080`
 
 
+## Author
 
 This project was written and is maintained by the following individuals:
-
-## Author
 
 * David Brown <davibrow@cisco.com>
 
