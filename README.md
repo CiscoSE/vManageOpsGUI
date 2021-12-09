@@ -10,12 +10,13 @@ Web GUI for basic SDWAN operations tasks.  Currently supports:
 Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for production.
 
 # Screenshots
-### Menu Screenshot: ![menu](https://user-images.githubusercontent.com/46031546/145484379-9c11be71-65b9-4a50-a149-7ee440a015d0.png)
+### Menu Screenshot:
+![menu](https://user-images.githubusercontent.com/46031546/145484379-9c11be71-65b9-4a50-a149-7ee440a015d0.png)
 
 ------
 
-### Edit or Deploy a Device ![ScreenShotEdit](https://user-images.githubusercontent.com/46031546/136489454-385b339a-b5b6-46ac-be81-7153ce7eb8e7.png)
-### Screenshot: 
+### Edit or Deploy a Device Screenshot:
+![ScreenShotEdit](https://user-images.githubusercontent.com/46031546/136489454-385b339a-b5b6-46ac-be81-7153ce7eb8e7.png) 
 ------
 
 # Basic use instructions:
