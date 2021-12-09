@@ -14,8 +14,8 @@ Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for 
 
 ------
 
-### Edit or Deploy a Device Screenshot: ![ScreenShotEdit](https://user-images.githubusercontent.com/46031546/136489454-385b339a-b5b6-46ac-be81-7153ce7eb8e7.png)
-
+### Edit or Deploy a Device ![ScreenShotEdit](https://user-images.githubusercontent.com/46031546/136489454-385b339a-b5b6-46ac-be81-7153ce7eb8e7.png)
+### Screenshot: 
 ------
 
 # Basic use instructions:
