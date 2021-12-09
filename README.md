@@ -12,7 +12,7 @@ Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for 
 # Screenshots
 ### Menu Screenshot:
 
-![ScreenShotMenu](https://user-images.githubusercontent.com/46031546/136583237-13c45f5c-7266-48e6-bea4-d2fd7b7e096e.png)
+![menu](https://user-images.githubusercontent.com/46031546/145484379-9c11be71-65b9-4a50-a149-7ee440a015d0.png)
 
 ### Edit or Deploy a Device Screenshot:
 
@@ -38,7 +38,12 @@ Runs as a Python3 Flask app natively for testing.  Tested on GCP and Apache for 
 - Browse to the local webserver
 
     `http://localhost:8080`
+    
+# Testing
 
+Test the app using the Cisco Sandboxes at https://developer.cisco.com/sdwan/sandbox/
+- The **ALWAYS-ON SANDBOX** Sandbox is restricted to Read Only and will generate errors in the later steps of the deploy, change config or RMA workflows.
+- The **RESERVATION SANDBOX** works fully with all workflows
 
 ## Author
 
