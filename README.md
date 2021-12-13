@@ -1,6 +1,6 @@
 # Cisco SDWAN Ops GUI   [![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/CiscoSE/vManageOpsGUI)
 
-Web GUI for basic SDWAN operations tasks.  Currently supports:
+Web GUI for basic SD-WAN operations tasks.  Currently supports:
 - Deploy a New Edge
 - Change Edge Template Values
 - RMA an Edge (Hardware Replacement)
